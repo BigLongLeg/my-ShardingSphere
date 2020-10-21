@@ -1,0 +1,30 @@
+spring:
+  shardingsphere:
+    datasource:
+      ds_0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://10.211.55.4:3306/ds0
+        username: root
+        password: root
+      ds_1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://10.211.55.4:3306/ds1
+        username: root
+        password: root
+      names: [ds_0,ds_1]
+    sharding:
+      tables:
+        t_order:
+          logicTable: t_order
+          actualDataNodes: ds_$->{0..1}.t_order_$->{0..3}
+          databaseStrategy:
+            inline:
+              shardingColumn: user_id
+              algorithmExpression: ds_$->{user_id % 2}
+          tableStrategy:
+            inline:
+              shardingColumn: order_id
+              algorithmExpression: t_order_$->{order_id % 2}
+    enabled: true
