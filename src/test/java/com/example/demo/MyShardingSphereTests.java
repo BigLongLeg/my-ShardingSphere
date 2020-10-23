@@ -1,6 +1,8 @@
 package com.example.demo;
 
 import com.example.demo.pojo.Order;
+import org.apache.shardingsphere.core.strategy.keygen.SnowflakeShardingKeyGenerator;
+import org.apache.shardingsphere.spi.keygen.ShardingKeyGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -27,9 +29,13 @@ class MyShardingSphereTests {
 
     @Test
     void insertData(){
+        ShardingKeyGenerator keyGenerator = new SnowflakeShardingKeyGenerator();
+
         Random random = new Random();
         for (int i = 0; i < 10000; i++) {
-            jdbcTemplate.update("insert ignore into t_order (user_id,order_id) values (?,?)",i,random.nextInt(10000));
+            Long aLong = (Long) keyGenerator.generateKey();
+            jdbcTemplate.update("insert ignore into t_order (user_id,order_id) values (?,?)",
+                    aLong ,random.nextInt(10000));
         }
     }
 
@@ -40,5 +46,11 @@ class MyShardingSphereTests {
             System.out.println(e);
         });
 
+    }
+    @Test
+    void generatorKey(){
+        ShardingKeyGenerator generator = new SnowflakeShardingKeyGenerator();
+        Comparable<?> comparable = generator.generateKey();
+        System.out.println(comparable);
     }
 }
